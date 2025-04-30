@@ -7,17 +7,11 @@ from .decorators import requires_userinfo
 
 @requires_userinfo
 def available(test):
-    """
-    Check if MongoDB is compiled with OpenSSL support
-    """
     return TestResult(success='OpenSSLVersion' in test.tester.info or 'openssl' in test.tester.info)
 
 
 @requires_userinfo
 def enabled(test):
-    """
-    Check if TLS/SSL is enabled on the server side
-    """
     if not available(test).success:
         return TestResult(success=True, severity=OMITTED)
 
@@ -30,9 +24,6 @@ def enabled(test):
 
 
 def valid(test):
-    """
-    Verify if server certificate is valid
-    """
     if not enabled(test) is True:
         return TestResult(success=True, severity=OMITTED)
 

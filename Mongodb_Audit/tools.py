@@ -119,25 +119,6 @@ def get_date():
         nth, local.tm_year, local.tm_hour, local.tm_min)
 
 
-# def check_version(version):
-#     # if application is binary then check for latest version
-#     if getattr(sys, 'frozen', False):
-#         try:
-#             url = "https://api.github.com/repos/stampery/mongoaudit/releases/latest"
-#             req = urlopen(url)
-#             releases = json.loads(req.read())
-#             latest = releases["tag_name"]
-#             if version < latest:
-#                 print("mongoaudit version " + version)
-#                 print("There's a new version " + latest)
-#                 _upgrade(releases)
-
-#         except (HTTPError, URLError):
-#             print("Couldn't check for upgrades")
-#         except os.error:
-#             print("Couldn't write mongoaudit binary")
-
-
 def _check_md5(file_path, md5):
     import hashlib
     with open(file_path) as mongoaudit_bin:

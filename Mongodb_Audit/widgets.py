@@ -11,13 +11,6 @@ def pad(widget, left=2, right=2):
 
 
 class TextButton(urwid.Button):
-    """
-    Args:
-      label (str): label for the text button
-      on_press (function): callback
-      user_data(): user_data for on_press
-      align (str): (default right)
-    """
 
     def __init__(self, label, on_press=None, user_data=None, align='right'):
         super(TextButton, self).__init__(
@@ -28,13 +21,6 @@ class TextButton(urwid.Button):
 
 
 class Card(urwid.WidgetWrap):
-    """
-    Args:
-      content (urwid.Widget):
-      header (urwid.Widget):
-      footer (urwid.Widget):
-    """
-
     def __init__(self, content, header=None, footer=None):
         wlist = []
         if header:
@@ -59,12 +45,6 @@ class ObjectButton(urwid.Button):
 
 
 class LineButton(ObjectButton):
-    """
-    Creates a LineBox button with an image on the left column and text on the right
-    Args:
-      text ((palette_class, str)[]): array of string tuples
-    """
-
     def __init__(self, text, vertical_padding=True):
         content = [urwid.Padding(self.get_content(text), left=3, right=3)]
         if vertical_padding:
@@ -75,13 +55,6 @@ class LineButton(ObjectButton):
 
 
 class ImageButton(ObjectButton):
-    """
-    Creates a LineBox button with an image on the left column and text on the right
-    Args:
-      pic (urwid.Pile): object created with picRead
-      text ((palette_class, str)[]): array of string tuples
-    """
-
     def __init__(self, pic, text):
         content = self.get_content(text)
         lbox = urwid.LineBox(urwid.Pile([DIV, urwid.Padding(
@@ -91,13 +64,6 @@ class ImageButton(ObjectButton):
 
 
 class InputField(urwid.WidgetWrap):
-    """
-    Creates an input field with underline and a label
-    Args:
-      label (str): label for the input
-      label_width (int): label width (default 15 characters)
-    """
-
     def __init__(self, label="", label_width=15, next_callback=False):
         self.label, self.next_callback = label, next_callback
         self.edit = urwid.Padding(urwid.Edit(), left=1, right=1)
@@ -127,17 +93,9 @@ class InputField(urwid.WidgetWrap):
         urwid.WidgetWrap.__init__(self, cols)
 
     def get_text(self):
-        """
-        Returns:
-          str: value of the input field
-        """
         return self.edit.original_widget.get_text()[0]
 
     def get_label(self):
-        """
-        Returns:
-          str: label for the input field
-        """
         return self.label
 
     def keypress(self, size, key):
@@ -148,18 +106,6 @@ class InputField(urwid.WidgetWrap):
 
 
 class FormCard(urwid.WidgetWrap):
-    """
-    Args:
-      content (urwid.Widget): any widget that can be piled
-      field_labels (str[]): labels for the input_fields
-      btn_label (str): label for the button
-      callbacks Dict(function, function): callbacks for next and back button
-      app (App): main app
-    Note:
-      callbacks['next'] must take the same amount of arguments as labels were passed
-      and each parameter in the callback must be named as the label but in snake case
-      and lower case e.g. 'Field Name' =>  field_name
-    """
 
     def __init__(self, data, field_labels, btn_label, callbacks):
         self.app = data["app"]
@@ -184,10 +130,6 @@ class FormCard(urwid.WidgetWrap):
         self.callbacks['next'](form=self, **(self.get_field_values()))
 
     def get_field_values(self):
-        """
-        Returns:
-          dict: the keys are the labels of the fields in snake_case
-        """
         values = dict()
         for field in self.fields:
             values[field.get_label().lower().replace(" ", "_")] = field.get_text()
@@ -195,21 +137,11 @@ class FormCard(urwid.WidgetWrap):
         return values
 
     def set_message(self, msg, error=False):
-        """
-        Shows a message message at the bottom of the form
-
-        Args:
-          msg (str): message
-          error (bool): if message type is error
-        """
         self.error = error
         self.message_field.set_text(('error' if error else 'info', msg))
         self.app.loop.draw_screen()
 
     def unset_error(self):
-        """
-        Removes the error message
-        """
         self.message_field.set_text('')
         self.app.loop.draw_screen()
 
@@ -221,15 +153,6 @@ class FormCard(urwid.WidgetWrap):
 
 
 class TestRunner(urwid.WidgetWrap):
-    """
-    Run the test while displaying the progress
-
-    Args:
-      title (str): title to pass to the callback
-      cred (dict(str: str)): credentials
-      tests (Test[]): tests to run
-      callback (function): to call when the tests finish running
-    """
 
     def __init__(self, title, cred, tests, data):
         self.app = None
@@ -253,9 +176,6 @@ class TestRunner(urwid.WidgetWrap):
         urwid.WidgetWrap.__init__(self, pile)
 
     def each(self, test):
-        """
-        Update the description of the test currently running
-        """
         current = self.progress_bar.get_current() + 1
         self.progress_text.set_text(
             ('progress', '%s/%s' % (str(current), str(self.data["num_tests"]))))
@@ -264,9 +184,6 @@ class TestRunner(urwid.WidgetWrap):
         self.app.loop.draw_screen()
 
     def run(self, app):
-        """
-        run tests
-        """
         self.app = app
         self.tester.run(self.each, self.end)
 
@@ -275,33 +192,18 @@ class TestRunner(urwid.WidgetWrap):
 
 
 class CustomProgressBar(urwid.ProgressBar):
-    """
-    ProgressBar that displays a semigraph instead of a percentage
-    """
     semi = u'\u2582'
 
     def get_text(self):
-        """
-        Return the progress bar percentage.
-        """
         return min(100, max(0, int(self.current * 100 / self.done)))
 
     def get_current(self):
-        """
-        Return the current value of the ProgressBar
-        """
         return self.current
 
     def get_done(self):
-        """
-        Return the end value of the ProgressBar
-        """
         return self.done
 
     def render(self, size, **_):
-        """
-        Render the progress bar.
-        """
         (maxcol,) = size
         ccol = int(self.current * maxcol / self.done)
         txt = urwid.Text([(self.normal, self.semi * ccol),
@@ -311,10 +213,6 @@ class CustomProgressBar(urwid.ProgressBar):
 
 
 class DisplayTest(urwid.WidgetWrap):
-    """
-    Display test result
-    """
-
     currently_displayed = 0
     top_columns = urwid.Columns([])
     test_result = urwid.Pile([])
@@ -333,11 +231,6 @@ class DisplayTest(urwid.WidgetWrap):
 
     @staticmethod
     def test_display(test, options):
-        """
-        Compose the element that will display the test
-        Returns:
-            [urwid.Widget]:
-        """
         empty_line = (DIV, options('weight', 1))
         title = (urwid.Text(
             ('text bold', test['title'][0].upper() + test['title'][1:])), options('weight', 1))
@@ -366,10 +259,6 @@ class DisplayTest(urwid.WidgetWrap):
         return [empty_line, title, empty_line, severity, caption, result, message]
 
     def get_top_text(self):
-        """
-        Returns:
-            tuple(str,str): PALETTE , Test n/total
-        """
         return 'header red', 'Test ' + \
                str(self.currently_displayed) + '/' + str(self.total)
 

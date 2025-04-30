@@ -18,12 +18,6 @@ OMITTED_MESSAGE = ('This test was omitted because of a missing requirement (e.g.
 
 
 class Tester(object):
-    """
-    Tester
-    Args:
-      cred (dict(str: str)): credentials
-      tests (Test[]): tests to run
-    """
 
     def __init__(self, cred, tests):
         self.retries = 0
@@ -34,11 +28,6 @@ class Tester(object):
         self.database = None
 
     def run(self, each, end):
-        """
-        Args:
-          each (): function to call before each test runs (used to update and redraw the screen)
-          end (function): function to call when all the tests have finished running
-        """
         result = []
         for test in self.tests:
             each(test)
@@ -63,12 +52,6 @@ class Tester(object):
         end(result)
 
     def get_connection(self):
-        """
-        Get the most secure kind of connection available.
-        Returns:
-          pymongo.MongoClient instance
-
-        """
         fqdn, port = self.cred['nodelist'][0]
         if hasattr(self, 'conn'):
             self.conn.close()
@@ -78,31 +61,15 @@ class Tester(object):
 
     @staticmethod
     def get_tls_connection(fqdn, port):
-        """
-        Creates an encrypted TLS/SSL connection.
-        Returns:
-          pymongo.MongoClient instance
-        """
         return pymongo.MongoClient(
             fqdn, port, ssl=False,
             serverSelectionTimeoutMS=1000)
 
     @staticmethod
     def get_plain_connection(fqdn, port):
-        """
-        Creates a cleartext (unencrypted) connection.
-        Returns:
-          pymongo.MongoClient instance
-        """
         return pymongo.MongoClient(fqdn, port, serverSelectionTimeoutMS=1000)
 
     def get_info(self):
-        """
-        Returns:
-          dict() or None: Get information about the MongoDB server we’re connected to.
-        Note:
-          https://docs.mongodb.com/v3.2/reference/command/buildInfo/#dbcmd.buildInfo
-        """
         if self.retries > 2:
             return None
         if hasattr(self, 'info'):
@@ -118,11 +85,6 @@ class Tester(object):
             return self.get_info()
 
     def get_db(self):
-        """
-        Authenticates to database
-        Returns:
-          pymongo.database.Database or False:  database(singleton) or false if authentication fails
-        """
         if bool(self.database):
             return self.database
         try:
@@ -140,24 +102,11 @@ class Tester(object):
 
 class Test(object):
     def __init__(self, test, tester):
-        """
-        Args:
-          test dict():
-          tester Tester:
-
-        Notes:
-          messages should contain an array with the messages for the different results that
-          the test can return, if messages is a function it should return a str[]
-        """
         self.__dict__.update(test)
         self.breaks = test['breaks'] if 'breaks' in test else None
         self.tester = tester
 
     def run(self):
-        """
-        Returns:
-          dict(): test result
-        """
         test_result = TEST_FUNCTIONS[self.test_name](self)
 
         severity = test_result.severity
@@ -200,16 +149,10 @@ def try_authorization(test):
 
 
 def try_credentials(test):
-    """
-    verify if the credentials are valid
-    """
     return TestResult(success=bool(test.tester.get_db()))
 
 
 def try_javascript(test):
-    """
-    Check if javascript is enabled in MongoDB
-    """
     try:
         database = test.tester.get_db()
         database.test.find_one({"$where": "function() { return true;}"})
@@ -220,9 +163,6 @@ def try_javascript(test):
 
 
 def try_dedicated_user(test):
-    """
-    Verify that the role only applies to one database
-    """
     roles = test.tester.get_roles()
     user_role_dbs = set()
     for role in roles['roles']:

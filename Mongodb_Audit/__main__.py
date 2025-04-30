@@ -9,14 +9,14 @@ import urwid
 from .version import __version__
 from .cards import Cards
 from .palette import PALETTE
-from .tools import check_version
+# from .tools import check_version
 
 
 class App(object):
     def __init__(self):
         self.name = 'mongoaudit'
         self.version = __version__
-        check_version(self.version)
+        # check_version(self.version)
         urwid.set_encoding("UTF-8")
         self.cards = Cards(self)
         self.setup_view()
@@ -27,8 +27,6 @@ class App(object):
         self.loop = urwid.MainLoop(
             placeholder, PALETTE, unhandled_input=self.key_handler)
         self.loop.widget = urwid.AttrMap(placeholder, 'bg')
-        #self.loop.widget._command_map['tab'] = 'cursor down'
-        #self.loop.widget._command_map['shift tab'] = 'cursor up'
         self.loop.screen.set_terminal_properties(colors=256)
         self.cards.welcome()
 

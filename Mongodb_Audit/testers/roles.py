@@ -5,12 +5,6 @@ from functools import reduce
 
 
 def valid_role(role):
-    """
-    Args:
-      role (str): name of a role
-    Returns:
-      Bool: True if the role is not administrative
-    """
     return role not in [
         'userAdminAnyDatabase',
         'dbAdminAnyDatabase'
@@ -22,33 +16,16 @@ def valid_role(role):
 
 
 def result_default_value():
-    """
-    Returns:
-      dict(set()): returns an empty dictionary that contains 3 empty
-      sets where valid, invalid and custom roles are stored
-    """
     return {'invalid': set([]), 'valid': set([]), 'custom': set([])}
 
 
 def combine_result(value_1, value_2):
-    """
-    Args:
-      value_1 (dict(set())): result_default_value
-      value_2 (dict(set())): result_default_value
-    Returns:
-      dict(set()): the union of 2 default values
-    """
     return {'invalid': value_1['invalid'].union(value_2['invalid']),
             'valid': value_1['valid'].union(value_2['valid']),
             'custom': value_1['custom'].union(value_2['custom'])}
 
 
 def basic_validation(roles):
-    """
-    Basic validation in case validate role fails due to lack of permissions
-    Returns:
-      result_default_value
-    """
     validated = result_default_value()
     for role in roles['roles']:
         if valid_role(role['role']):
@@ -87,11 +64,6 @@ def validate_role_dict(role, database):
 
 
 def validate_role(role, database):
-    """
-    Recursively process the different roles that a role implements or inherits
-    Args:
-      role (list or dict): value returned by database.command 'usersInfo' or 'rolesInfo'
-    """
     if isinstance(role, list):
         return reduce(lambda x, y: combine_result(x, y), [validate_role(r, database) for r in role]) \
             if bool(role) else result_default_value()
@@ -107,23 +79,15 @@ def get_message(validated, state, text1, text2):
 
 def validation_result(validated):
     if bool(validated['invalid']):
-        # if the profile is invalid
         return TestResult(success=False, message=decode_to_string(validated['invalid']))
     elif bool(validated['custom']):
-        # if the profile has custom permissions
         message = get_message(validated, 'valid', 'Your user\'s role set ',
                               ' seems to be ok, but we couldn\'t do an exhaustive check.')
         return TestResult(success=True, severity=WARNING, message=message)
-    # if everything seems to be ok
     return TestResult(success=True, message=decode_to_string(validated['valid']))
 
 
 def try_roles(test):
-    """
-    Verify that the user roles are not administrative
-    Returns:
-      [bool or 2 , str ]: True Valid role, False invalid role, 2 custome role ,
-    """
 
     database = test.tester.get_db()
     roles = test.tester.get_roles()
@@ -131,7 +95,6 @@ def try_roles(test):
     try:
         validated = validate_role(roles, database)
     except pymongo.errors.OperationFailure:
-        # if the users doesn't have permission to run the command 'rolesInfo'
         validated = basic_validation(roles)
         if bool(validated['valid']):
             message = get_message(validated, 'valid', 'You user permission ',
